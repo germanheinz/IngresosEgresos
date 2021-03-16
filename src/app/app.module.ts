@@ -10,8 +10,10 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { appReducers } from './app.reducer';
 
 // Firebase
-import { AngularFireModule } from 'angularfire2';
-import { AngularFirestoreModule } from 'angularfire2/firestore';
+// AngularFire
+import { AngularFireModule } from '@angular/fire';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { AngularFireAuthModule } from '@angular/fire/auth';
 
 // Modulos personalizados
 import { AuthModule } from './auth/auth.module';
@@ -36,6 +38,7 @@ import { AppComponent } from './app.component';
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
+    AngularFireAuthModule,
     StoreModule.forRoot(appReducers),
     StoreDevtoolsModule.instrument({
       maxAge: 25, // Retains last 25 states

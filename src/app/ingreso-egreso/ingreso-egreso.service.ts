@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore } from 'angularfire2/firestore';
+
+//import { AngularFirestore } from 'angularfire2/firestore';
+
+import 'firebase/firestore';
+import { AngularFirestore } from '@angular/fire/firestore';
+
 import { IngresoEgreso } from './ingreso-egreso.model';
 import { AuthService } from '../auth/auth.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../app.reducer';
 import { filter, map } from 'rxjs/operators';
-import { SetItemsAction, UnsetItemsAction } from './ingreso-egreso.actions';
+import { setItemsAction, unsetItemsAction } from './ingreso-egreso.actions';
 import { Subscription } from 'rxjs';
 
 @Injectable({
@@ -21,23 +26,9 @@ export class IngresoEgresoService {
                public authService: AuthService,
                private store: Store<AppState>) { }
 
+  ingresoEgresoItems( uid: string ) {
 
-
-  initIngresoEgresoListener() {
-
-    this.ingresoEgresoListerSubcription = this.store.select('auth')
-        .pipe(
-          filter( auth => auth.user != null )
-        )
-        .subscribe(auth =>
-              this.ingresoEgresoItems(auth.user.uid)
-            );
-
-  }
-
-  private ingresoEgresoItems( uid: string ) {
-
-    this.ingresoEgresoItemsSubcription = this.afDB.collection(`${ uid }/ingresos-egresos/items`)
+    return this.ingresoEgresoItemsSubcription = this.afDB.collection(`${ uid }/ingresos-egresos/items`)
              .snapshotChanges()
              .pipe(
                map(  docData => {
@@ -45,7 +36,7 @@ export class IngresoEgresoService {
                 return docData.map( doc => {
                   return {
                     uid: doc.payload.doc.id,
-                    ...doc.payload.doc.data()
+                    ...doc.payload.doc.data() as any
                   };
                 });
 
@@ -53,17 +44,31 @@ export class IngresoEgresoService {
              )
              .subscribe( (coleccion: any[]) => {
 
-              this.store.dispatch( new SetItemsAction(coleccion) );
+              this.store.dispatch( new setItemsAction(coleccion) );
 
              });
 
 
   }
 
+  initIngresosEgresosListener(uid: string) {
+
+    return this.afDB.collection(`${ uid }/ingresos-egresos/items`)
+      .snapshotChanges()
+      .pipe(
+        map( snapshot => snapshot.map( doc => ({
+              uid: doc.payload.doc.data,
+              ...doc.payload.doc.data() as any
+            })
+          )
+        )
+      );
+  }
+
   cancelarSubscriptions() {
+    this.store.dispatch( new unsetItemsAction() );
     this.ingresoEgresoListerSubcription.unsubscribe();
     this.ingresoEgresoItemsSubcription.unsubscribe();
-    this.store.dispatch( new UnsetItemsAction() );
   }
 
 

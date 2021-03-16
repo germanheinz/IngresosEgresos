@@ -26,7 +26,7 @@ export class IngresoEgresoComponent implements OnInit, OnDestroy {
   cargando: boolean;
 
   constructor(public ingresoEgresoService: IngresoEgresoService,
-              private store: Store<fromIngresoEgreso.AppState>) { }
+              private store: Store<AppState>) { }
 
   ngOnInit() {
 
@@ -50,11 +50,14 @@ export class IngresoEgresoComponent implements OnInit, OnDestroy {
 
     const ingresoEgreso = new IngresoEgreso({ ...this.forma.value, tipo: this.tipo  });
 
-    this.ingresoEgresoService.crearIngresoEgreso( ingresoEgreso )
+    console.log(ingresoEgreso);
+
+    return this.ingresoEgresoService.crearIngresoEgreso( ingresoEgreso )
           .then( () => {
 
+            console.log(ingresoEgreso);
             this.store.dispatch( new DesactivarLoadingAction() );
-            Swal('Creado', ingresoEgreso.descripcion, 'success');
+            Swal.fire('Creado', ingresoEgreso.descripcion, 'success');
             this.forma.reset({ monto: 0 });
 
           });
